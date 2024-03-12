@@ -36,6 +36,7 @@ if ($days -eq 0 -and $zip -eq "N" -and $del -eq "N") {
     $zip = Read-Host "Moechten Sie die alten Dateien komprimieren? (Y/N)"
     # Nutzer fragen, ob die alten Datein gelöscht werden sollen
     $del = Read-Host "Moechten Sie die alten Dateien loeschen? (Y/N)"
+    # Setzt die Variable $log auf Y, da sobald diese if-Abfrage greift, ein Mensch auf das Terminal schaut und den Vorgang sehen soll
     $log = "Y"
 }
 
