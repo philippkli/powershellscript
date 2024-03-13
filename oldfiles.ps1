@@ -14,6 +14,13 @@ param (
     # Parameter ob das Skript in Powershell den Vorgang wiedergibt
     [string]$log = "N"
 )
+# Prüfen der Parameter - Löscht Leerzeilen & macht alles Uppercase & reduziert den String auf das erste Zeichen
+$zip = $zip.ToUpper().Trim()
+$zip = $zip.Substring(1)
+$del = $del.ToUpper().Trim()
+$del = $del.Substring(1)
+$log = $log.ToUpper().Trim()
+$log = $log.Substring(1)
 # Der Ordner in dem sich das Script befindet
 $currentDirectory = $PSScriptRoot
 # Das heutige Datum erhalten
@@ -41,48 +48,47 @@ if ($days -eq 0 -and $zip -eq "N" -and $del -eq "N") {
 }
 
 # Das "Deadline" Datum errechnen
-$cutoffDate = $currentDate.AddDays(-$days)
+$zipDate = $currentDate.AddDays(-1)
 # Datein finden, die älter sind als das Deadline Datum
-$oldFiles = Get-ChildItem -Path $currentDirectory | Where-Object { $_.LastWriteTime -lt $cutoffDate}
+$oldFiles = Get-ChildItem -Path $currentDirectory | Where-Object { $_.LastWriteTime -lt $zipDate}
 
 # Wenn die Dateien komprimiert werden sollen, dann wird der folgende Code ausgeführt
-if ($zip -eq "Y" -or $zip -eq "y") {
+if ($zip -eq "Y") {
     foreach ($file in $oldFiles) {
-        # Name/Zeit für .zip Datein erstellen
-        $timestamp = Get-Date -Format "yyyMMddHHmm"
-        # Zip Datei erstellen
-        $zipFileName = "old_$($file.BaseName)_$timestamp.zip"
-        $zipPath = Join-Path -Path $currentDirectory -ChildPath $zipFileName
+        # Name und Zip Datei erstellen
+        $zipFileName = "$file.DirectoryName\$file.BaseName"+".zip"
         # Datein komprimieren
-        Compress-Archive -Path $file.FullName -DestinationPath $zipPath
-        if ($log -eq "Y" -or $log -eq "y") {
+        Compress-Archive -Path $file.FullName -DestinationPath $zipFileName
+        if ($log -eq "Y") {
             Write-Host "Datei $($file.FullName) wurde in $zipFileName komprimiert" #test
         }
     }
 } else {
-    if ($log -eq "Y" -or $log -eq "y") {
+    if ($log -eq "Y") {
         Write-Host "Dateien wurden nicht komprimiert" #test
     }
 }
 
+# Das "Deadline" fürs löschen Datum errechnen
+$cutoffDate = $currentDate.AddDays(-$days)
 # Wenn die alten unkomprimierten Dateien gelöscht werden sollen, dann wird der folgende Code ausgeführt
-if ($del -eq "Y" -or $del -eq "y") {
+if ($del -eq "Y") {
     foreach ($file in $oldFiles) {
         # Löscht die alten unkomprimierten Dateien. VORSICHT!!!!!
         Remove-Item -Path $file.FullName -Force
-        if ($log -eq "Y" -or $log -eq "y") {
+        if ($log -eq "Y") {
         Write-Host "$($file.FullName) wurde 'geloescht'" #test
         }
     }
-    if ($log -eq "Y" -or $log -eq "y") {
+    if ($log -eq "Y") {
     Write-Host "Alte Dateien wurden erfolgreich geloescht" #test
     }
 } else {
-    if ($log -eq "Y" -or $log -eq "y") {
+    if ($log -eq "Y") {
     Write-Host "Alte Dateien wurden nicht geloescht" #test
     }
 }
 
-if ($log -eq "Y" -or $log -eq "y") {
+if ($log -eq "Y") {
     Pause
 }
